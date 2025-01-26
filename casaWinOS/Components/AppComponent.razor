@@ -1,0 +1,67 @@
+﻿@page "/view-app"
+@using casaWinOS.Data
+
+@inject IJSRuntime jsRuntime
+@inject MyDbContext DbContext
+
+<div class="app-container" style="position: relative; max-width: 200px; max-height: 200px; margin: 10px;">
+    <a href="@URL">
+        <div id="component">
+            <img id="appIcon" src="@IconPath" />
+            <h2 id="appName">@Name</h2>
+        </div>
+    </a>
+
+    <div class="options-menu">
+        <button @onclick="ToggleOptionsMenu">⋮</button>
+        @if (isOptionsMenuVisible)
+        {
+            <ul>
+                <li><a href="@($"/edit/{Id}")">Settings</a></li>
+                <li><a href="#" @onclick="ConfirmDelete">Delete</a></li>
+            </ul>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public string Name { get; set; } = string.Empty;
+
+    [Parameter]
+    public string IconPath { get; set; } = string.Empty;
+
+    [Parameter]
+    public string URL { get; set; } = string.Empty;
+
+    private bool isOptionsMenuVisible = false;
+
+    private void ToggleOptionsMenu()
+    {
+        isOptionsMenuVisible = !isOptionsMenuVisible;
+    }
+
+    private async Task ConfirmDelete(MouseEventArgs e)
+    {
+        if (await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this app?"))
+        {
+            // Call the method to delete the app
+            await DeleteApp();
+        }
+    }
+
+    private async Task DeleteApp()
+    {
+        // Your logic to delete the app from the database
+        // Example:
+        var app = await DbContext.MyApps.FindAsync(Id);
+        if (app != null)
+        {
+            DbContext.MyApps.Remove(app);
+            await DbContext.SaveChangesAsync();
+        }
+    }
+}

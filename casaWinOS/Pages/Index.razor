@@ -1,0 +1,69 @@
+﻿@page "/"
+@using casaWinOS.Components
+@using casaWinOS.Data
+@inject MyDbContext DbContext
+
+<style>
+    
+    body {
+        background-image: url("https://wallpaperaccess.com/full/2180711.jpg");
+        min-height: 100%;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-size: cover;
+        -moz-background-size: cover;
+    }
+
+    h1 {
+        color: white;
+    }
+
+    #appTray{
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+</style>
+
+<div style="display: flex; justify-content: space-between; margin: 20px;">
+    <h1>
+        App
+    </h1>
+    <h1 style="cursor: pointer;">
+        <a style="text-decoration: none;">
+        +
+        </a>
+    </h1>
+</div>
+
+<div id="appTray">
+    @if (apps.Count == 0)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+
+        @foreach (var app in apps)
+        {
+            <AppComponent Name="@app.Name" URL="@app.Url" IconPath="@app.IconPath"/>
+        }
+    }
+</div>
+
+
+
+@code {
+    List<ISelectableApp> apps = new List<ISelectableApp>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var apps = DbContext.MyApps.ToList();
+        foreach (var app in apps)
+        {
+            this.apps.Add(app);
+        }
+
+        //this.apps.Add(new SelectableApp("Plex", "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Plex/icon.png", "https://192.168.1.109:32400/"));
+    }
+}
