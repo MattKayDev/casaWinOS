@@ -62,3 +62,31 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+
+
+
+body {
+    background-image: url("https://wallpaperaccess.com/full/2180711.jpg");
+    min-height: 100%;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    background-size: cover;
+    -moz-background-size: cover;
+}
+
+
+
+a,
+a:link,
+a:visited,
+a:hover,
+a:focus,
+a:active {
+    text-decoration: none;
+    color: white;
+}
+
+h1 {
+    color: white;
+}

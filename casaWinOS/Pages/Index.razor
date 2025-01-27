@@ -4,15 +4,6 @@
 @inject MyDbContext DbContext
 
 <style>
-    
-    body {
-        background-image: url("https://wallpaperaccess.com/full/2180711.jpg");
-        min-height: 100%;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
-        background-size: cover;
-        -moz-background-size: cover;
-    }
 
     h1 {
         color: white;
@@ -23,6 +14,10 @@
         flex-wrap: wrap;
     }
 
+    a {
+
+    }
+
 </style>
 
 <div style="display: flex; justify-content: space-between; margin: 20px;">
@@ -30,7 +25,7 @@
         App
     </h1>
     <h1 style="cursor: pointer;">
-        <a style="text-decoration: none;">
+        <a style="text-decoration: none;" href="add-app">
         +
         </a>
     </h1>
@@ -39,7 +34,7 @@
 <div id="appTray">
     @if (apps.Count == 0)
     {
-        <p><em>Loading...</em></p>
+        <p style="color: white;">Loading...</p>
     }
     else
     {
