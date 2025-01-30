@@ -1,40 +1,128 @@
 ﻿@page "/add-web-app"
+@using System.Text.RegularExpressions;
 @using casaWinOS.Data
 @using Microsoft.AspNetCore.Components.Forms
+@using casaWinOS.Services;
 
 @inject MyDbContext DbContext
+@inject PopupService popupService
+@inject GlobalSettings gbSettings
+@inject NavigationManager NavigationManager
+
+<PageTitle>Add Web App</PageTitle>
+<h1>Add Web App</h1>
 
 
-<h3>Add App</h3>
-
-
-<EditForm Model="@newApp" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="@app" OnValidSubmit="HandleValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary class="validation-summary" />
     <div class="edit-form">
         <div>
             <label for="name">Name:</label>
-            <InputText id="name" @bind-Value="newApp.Name" />
+            <InputText id="name" @bind-Value="name" />
         </div>
         <div>
             <label for="url">URL:</label>
-            <InputText id="url" @bind-Value="newApp.Url" />
+            <InputText id="url" @bind-Value="url" />
+        </div>
+        <div>
+            <label for="port">Port:</label>
+            <InputNumber id="port" @bind-Value="portNo" />
+        </div>
+        <div>
+            <label for="ssl">Using SSL:</label>
+            <InputCheckbox id="ssl" @bind-Value="isSsl" />
         </div>
         <div>
             <label for="appIcon">Icon Path:</label>
-            <InputText id="appIcon" @bind-Value="newApp.IconPath" />
+            <InputText id="appIcon" @bind-Value="icon" />
         </div>
+        
         <button type="submit">Add</button>
     </div>
 </EditForm>
 
 @code {
-    private SelectableApp newApp = new SelectableApp();
+
+    private SelectableApp app = new SelectableApp();
+    private string url = string.Empty;
+    private string name = string.Empty;
+    private string icon = string.Empty;
+    private bool isSsl = false;
+    private int portNo = 0;
 
     private async Task HandleValidSubmit()
     {
-        DbContext.MyApps.Add(newApp);
-        await DbContext.SaveChangesAsync();
-        newApp = new SelectableApp("", "", "");  // Reset form
+        bool validUrl = await this.CheckURL();
+        if (validUrl)
+        {
+            app.IconPath = icon ?? string.Empty;
+            app.Name = name;
+            app.Url = url;
+
+            DbContext.MyApps.Add(app);
+            await DbContext.SaveChangesAsync();
+
+            if (gbSettings.ShowAppAdditionConfirmation)
+            {
+                await popupService.ShowMessage($"{name} has been added.");
+            }
+            
+            this.ResetForm();
+            NavigationManager.NavigateTo("../");
+        }
+    }
+
+    private async Task<bool> CheckURL()
+    {
+        if (!IsValidUrl(url))
+        {
+            // Display error message to the user
+            // ...
+            await popupService.DisplayError("Not valid URL");
+            return false; // Don't proceed with adding the app
+        }
+
+        this.CheckURLForPort();
+
+        if (isSsl && !url.StartsWith("https://"))
+        {
+            url = $"https://{url}";
+        }
+        else if (!isSsl && !url.StartsWith("http://"))
+        {
+            url = $"http://{url}";
+        }
+
+        return true;
+    }
+
+    private void CheckURLForPort()
+    {
+        if (url.Contains(":"))
+        {
+            return;
+        }
+        else
+        {
+            url = $"{url}:{portNo}";
+        }
+    }
+
+
+    private bool IsValidUrl(string url)
+    {
+        string pattern = @"^(https?://)?([\w-]+\.)+[\w-]+(:[0-9]+)?(/[\w-./]*)?$"; // Basic URL regex
+        return Regex.IsMatch(url, pattern, RegexOptions.IgnoreCase);
+    }
+
+    private void ResetForm()
+    {
+        this.name = string.Empty;
+        this.url = string.Empty;
+        this.isSsl = false;
+        this.icon = string.Empty;
+        this.portNo = 0;
+        app = new SelectableApp(); // Reset the entire object
     }
 }

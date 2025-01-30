@@ -1,4 +1,5 @@
 using casaWinOS.Data;
+using casaWinOS.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<PopupService>();
+builder.Services.AddScoped<GlobalSettings>();
 
 var app = builder.Build();
 

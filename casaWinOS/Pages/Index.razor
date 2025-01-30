@@ -41,7 +41,7 @@
 
         @foreach (var app in apps)
         {
-            <AppComponent Name="@app.Name" URL="@app.Url" IconPath="@app.IconPath"/>
+            <AppComponent Name="@app.Name" URL="@app.Url" IconPath="@app.IconPath" Id="@app.Id" OnDelete="HandleDelete"/>
         }
     }
 </div>
@@ -53,12 +53,24 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadApps();
+    }
+
+    private async Task HandleDelete(int id)
+    {
+        // Refresh the app list after deletion
+        await LoadApps();
+    }
+
+    private async Task LoadApps()
+    {
+        this.apps.Clear();
+
         var apps = DbContext.MyApps.ToList();
         foreach (var app in apps)
         {
             this.apps.Add(app);
         }
-
         //this.apps.Add(new SelectableApp("Plex", "https://cdn.jsdelivr.net/gh/IceWhaleTech/CasaOS-AppStore@main/Apps/Plex/icon.png", "https://192.168.1.109:32400/"));
     }
 }

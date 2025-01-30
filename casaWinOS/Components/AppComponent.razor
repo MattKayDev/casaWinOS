@@ -1,7 +1,8 @@
 ﻿@page "/view-app"
 @using casaWinOS.Data
+@using casaWinOS.Services;
 
-@inject IJSRuntime jsRuntime
+@inject PopupService popupService
 @inject MyDbContext DbContext
 
 <div class="app-container" style="position: relative; max-width: 200px; max-height: 200px; margin: 10px;">
@@ -37,6 +38,8 @@
     [Parameter]
     public string URL { get; set; } = string.Empty;
 
+    [Parameter] public EventCallback<int> OnDelete { get; set; } // Add this line
+
     private bool isOptionsMenuVisible = false;
 
     private void ToggleOptionsMenu()
@@ -46,9 +49,9 @@
 
     private async Task ConfirmDelete(MouseEventArgs e)
     {
-        if (await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this app?"))
+        bool confirmed = await popupService.ConfirmDeleteApp(Name);
+        if (confirmed)
         {
-            // Call the method to delete the app
             await DeleteApp();
         }
     }
@@ -62,6 +65,9 @@
         {
             DbContext.MyApps.Remove(app);
             await DbContext.SaveChangesAsync();
+
+            // Notify the parent that an app has been deleted
+            await OnDelete.InvokeAsync(Id); // Notify parent with the ID of the deleted app
         }
     }
 }
